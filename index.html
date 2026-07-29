@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VideoColorAI 🎨</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #0f0f1a;
+    color: #fff;
+    font-family: 'Segoe UI', Arial, sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+  }
+  .header {
+    text-align: center;
+    margin-bottom: 30px;
+    padding-top: 20px;
+  }
+  .header h1 {
+    font-size: 2rem;
+    background: linear-gradient(135deg, #a855f7, #3b82f6);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .header p { color: #888; margin-top: 8px; }
+
+  .upload-box {
+    width: 100%;
+    max-width: 500px;
+    border: 2px dashed #4b2d8f;
+    border-radius: 16px;
+    padding: 40px 20px;
+    text-align: center;
+    background: #1a1a2e;
+    cursor: pointer;
+    transition: border-color 0.3s;
+  }
+  .upload-box:hover { border-color: #a855f7; }
+  .upload-box input { display: none; }
+  .upload-btn {
+    display: inline-block;
+    margin-top: 15px;
+    padding: 12px 30px;
+    background: linear-gradient(135deg, #a855f7, #3b82f6);
+    border-radius: 30px;
+    font-size: 1rem;
+    cursor: pointer;
+    border: none;
+    color: white;
+    font-weight: bold;
+  }
+  .formats { color: #555; font-size: 0.8rem; margin-top: 10px; }
+
+  #preview-section { width: 100%; max-width: 500px; display: none; margin-top: 20px; }
+  video {
+    width: 100%;
+    border-radius: 12px;
+    background: #000;
+  }
+
+  .controls {
+    background: #1a1a2e;
+    border-radius: 16px;
+    padding: 20px;
+    margin-top: 15px;
+  }
+  .controls h3 { color: #a855f7; margin-bottom: 15px; font-size: 1rem; }
+
+  .slider-group { margin-bottom: 15px; }
+  .slider-group label {
+    display: flex;
+    justify-content: space-between;
+    color: #ccc;
+    font-size: 0.85rem;
+    margin-bottom: 6px;
+  }
+  input[type=range] {
+    width: 100%;
+    accent-color: #a855f7;
+    height: 4px;
+  }
+
+  .presets {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 15px;
+  }
+  .preset-btn {
+    padding: 6px 14px;
+    border-radius: 20px;
+    border: 1px solid #4b2d8f;
+    background: transparent;
+    color: #ccc;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .preset-btn:hover, .preset-btn.active {
+    background: #a855f7;
+    color: white;
+    border-color: #a855f7;
+  }
+
+  .apply-btn {
+    width: 100%;
+    margin-top: 20px;
+    padding: 14px;
+    background: linear-gradient(135deg, #a855f7, #3b82f6);
+    border: none;
+    border-radius: 12px;
+    color: white;
+    font-size: 1rem;
+    font-weight: bold;
+    cursor: pointer;
+  }
+
+  #canvas { display: none; }
+  #status {
+    text-align: center;
+    margin-top: 10px;
+    color: #a855f7;
+    font-size: 0.9rem;
+    min-height: 20px;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>🎨 VideoColorAI</h1>
+  <p>تحسين ألوان الفيديو</p>
+</div>
+
+<div class="upload-box" onclick="document.getElementById('fileInput').click()">
+  <div style="font-size:3rem">📁</div>
+  <p style="color:#888; margin-top:10px">اسحب الفيديو هنا أو</p>
+  <button class="upload-btn">📂 اختر فيديو من جهازك</button>
+  <p class="formats">MP4 · MOV · AVI · WebM</p>
+  <input type="file" id="fileInput" accept="video/*">
+</div>
+
+<div id="preview-section">
+  <video id="videoEl" controls></video>
+
+  <div class="controls">
+    <h3>🎛️ إعدادات الألوان</h3>
+
+    <div class="slider-group">
+      <label><span>السطوع</span><span id="bVal">100%</span></label>
+      <input type="range" id="brightness" min="50" max="200" value="100">
+    </div>
+    <div class="slider-group">
+      <label><span>التباين</span><span id="cVal">100%</span></label>
+      <input type="range" id="contrast" min="50" max="200" value="100">
+    </div>
+    <div class="slider-group">
+      <label><span>التشبع</span><span id="sVal">100%</span></label>
+      <input type="range" id="saturation" min="0" max="300" value="100">
+    </div>
+    <div class="slider-group">
+      <label><span>الدفء</span><span id="wVal">0</span></label>
+      <input type="range" id="warmth" min="-50" max="50" value="0">
+    </div>
+
+    <div class="presets">
+      <button class="preset-btn" onclick="applyPreset('cinematic', this)">🎬 سينمائي</button>
+      <button class="preset-btn" onclick="applyPreset('vivid', this)">✨ حيوي</button>
+      <button class="preset-btn" onclick="applyPreset('warm', this)">🌅 دافئ</button>
+      <button class="preset-btn" onclick="applyPreset('cool', this)">❄️ بارد</button>
+      <button class="preset-btn" onclick="applyPreset('bw', this)">⬛ أبيض وأسود</button>
+      <button class="preset-btn" onclick="applyPreset('reset', this)">↺ إعادة</button>
+    </div>
+
+    <button class="apply-btn" onclick="applyFilters()">✅ تطبيق الفلاتر</button>
+    <div id="status"></div>
+  </div>
+</div>
+
+<canvas id="canvas"></canvas>
+
+<script>
+const fileInput = document.getElementById('fileInput');
+const videoEl = document.getElementById('videoEl');
+const previewSection = document.getElementById('preview-section');
+
+fileInput.addEventListener('change', e => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const url = URL.createObjectURL(file);
+  videoEl.src = url;
+  previewSection.style.display = 'block';
+  updateFilter();
+});
+
+['brightness','contrast','saturation','warmth'].forEach(id => {
+  document.getElementById(id).addEventListener('input', () => {
+    updateVal(id);
+    updateFilter();
+  });
+});
+
+function updateVal(id) {
+  const v = document.getElementById(id).value;
+  const map = { brightness:'bVal', contrast:'cVal', saturation:'sVal', warmth:'wVal' };
+  const suffix = id === 'warmth' ? '' : '%';
+  document.getElementById(map[id]).textContent = v + suffix;
+}
+
+function updateFilter() {
+  const b = document.getElementById('brightness').value;
+  const c = document.getElementById('contrast').value;
+  const s = document.getElementById('saturation').value;
+  const w = parseInt(document.getElementById('warmth').value);
+  const hue = w * 0.5;
+  videoEl.style.filter = `brightness(${b}%) contrast(${c}%) saturate(${s}%) hue-rotate(${hue}deg)`;
+}
+
+function applyPreset(name, btn) {
+  document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const presets = {
+    cinematic: [85, 120, 80, -10],
+    vivid:     [110, 120, 180, 5],
+    warm:      [105, 100, 110, 30],
+    cool:      [100, 105, 110, -30],
+    bw:        [100, 120, 0, 0],
+    reset:     [100, 100, 100, 0]
+  };
+  const [b,c,s,w] = presets[name];
+  document.getElementById('brightness').value = b;
+  document.getElementById('contrast').value = c;
+  document.getElementById('saturation').value = s;
+  document.getElementById('warmth').value = w;
+  ['brightness','contrast','saturation','warmth'].forEach(updateVal);
+  updateFilter();
+}
+
+function applyFilters() {
+  document.getElementById('status').textContent = '✅ تم تطبيق الفلاتر!';
+  setTimeout(() => {
+    document.getElementById('status').textContent = 'لحفظ الفيديو مع الفلاتر استخدم CapCut أو Premiere';
+  }, 2000);
+}
+</script>
+</body>
+</html>
