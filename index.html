@@ -520,14 +520,17 @@
 
     <!--
       ⬇️ قسم الأعمال — كل بطاقة تفتح الفيديو المرتبط بها من Google Drive في تبويب جديد.
-      لإضافة عمل جديد: انسخ بطاقة <a class="vcard" href="...">
+      لإضافة عمل جديد: انسخ بطاقة <div class="vcard">
+<video controls preload="metadata" style="width:100%;border-radius:12px;">
+<source src="videos/project1.mp4" type="video/mp4">
+</video>
       وبدّل الرابط بنفس رابط "المشاركة" لفيديو Drive الجديد،
       وتأكد أن إعداد المشاركة على "أي شخص لديه الرابط".
     -->
     <div class="grid" data-reveal>
       <a class="vcard" href="https://drive.google.com/file/d/1N6jeS2FgnRPUgPxiHsf3PoiYLSjgCDPS/view" target="_blank" rel="noopener">
         <div class="info"><span class="num">عمل 01</span><span class="play">▶</span></div>
-      </a>
+      </div>
       <a class="vcard" href="https://drive.google.com/file/d/117RknIFe4n1Fwdhwdja9CUz55ax9EERy/view" target="_blank" rel="noopener">
         <div class="info"><span class="num">عمل 02</span><span class="play">▶</span></div>
       </a>
